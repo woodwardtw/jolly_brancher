@@ -35,7 +35,6 @@ function make_brancher_html(){
                     <label>Which of your blogs would you like to fork this content to?</label><br/>
                     <select id='blog-select' name='blog-select'>
                         <option value=''>Select your blog</option>" . create_blogs_dropdown( get_blogs_of_current_user_by_role() ) . "</select>
-                    <input type='text' name='blog-post-content' value='".the_content()."'></input> 
                 </p>
                   <fieldset id='submit'>
                     <input type='hidden' name='submit' value='1'/>
@@ -54,11 +53,13 @@ function make_brancher_html(){
                if (is_user_logged_in() && $_POST['blog-select'] ) {               	              
                	    //go elsewhere
                	    $base_content = $post->post_content;//$_POST['blog-post-content'];
+               	    $home_url = $post->guid;
+               	    $base_title = $post->post_title;
                     $remote_blog = get_remote_blog_info( $_POST['blog-select'] );
                     switch_to_blog($_POST['blog-select']);
                     $forked_post = array(
-						  'post_title'    => 'you have been forked',
-						  'post_content'  => $base_content . '<p>Forked from . . . </p>',
+						  'post_title'    => 'Fork of ' . $base_title,
+						  'post_content'  => $base_content . '<div style="width: 100%; display:block; margin: 20px 0;">Forked from <a href="'.$home_url.'">'.$base_title.'</a></p>',
 						  'post_status'   => 'publish',						 
 						);
 						 
