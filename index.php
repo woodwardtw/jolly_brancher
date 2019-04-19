@@ -21,76 +21,65 @@ function jolly_rancher_load_scripts() {
     $deps = array('jquery');
     $version= '1.0'; 
     $in_footer = true;    
-    wp_enqueue_script('jolly-rancher-main-js', plugin_dir_url( __FILE__) . 'js/jolly-rancher-main.js', $deps, $version, $in_footer); 
-    wp_enqueue_style( 'jolly-rancher-main-css', plugin_dir_url( __FILE__) . 'css/jolly-rancher-main.css');
+    wp_enqueue_script('jolly-brancher-main-js', plugin_dir_url( __FILE__) . 'js/jolly-brancher-main.js', $deps, $version, $in_footer); 
+    wp_enqueue_style( 'jolly-brancher-main-css', plugin_dir_url( __FILE__) . 'css/jolly-brancher-main.css');
 }
 
 
 function make_brancher_html(){
- if (is_user_logged_in()) {                
+	global $post;
+ if (is_user_logged_in()) {  
                 $blog_select = "
+                <form id='jollbrancher-fork-form' action='" . get_the_permalink() . "' method='post'>
                 <p>
                     <label>Which of your blogs would you like to fork this content to?</label><br/>
                     <select id='blog-select' name='blog-select'>
                         <option value=''>Select your blog</option>" . create_blogs_dropdown( get_blogs_of_current_user_by_role() ) . "</select>
+                    <input type='text' name='blog-post-content' value='".the_content()."'></input> 
                 </p>
                   <fieldset id='submit'>
                     <input type='hidden' name='submit' value='1'/>
                     <input type='submit' value='Submit' />
-                </fieldset>";
+                </fieldset></form>";
                 $blog_select_login_prompt = "";
             } 
             else {
                 $blog_select = "";
                 $blog_select = "<p>To fork this you'll have to <a href='" . wp_login_url(get_the_permalink()) . "'>login</a>.</p>";
             }
-           if (!is_admin() && $_POST) {
+           if ($_POST) {
 
                 $form_response = "";
-                
-                if ($_POST['email']) {
-                    die('<p>An error occurred. You have not been connected.</p>');
-                } 
-                else if (is_user_logged_in() && $_POST['blog-select'] && !$_POST['email']) {
-
+              
+               if (is_user_logged_in() && $_POST['blog-select'] ) {               	              
+               	    //go elsewhere
+               	    $base_content = $post->post_content;//$_POST['blog-post-content'];
                     $remote_blog = get_remote_blog_info( $_POST['blog-select'] );
-                     
-                  
+                    switch_to_blog($_POST['blog-select']);
+                    $forked_post = array(
+						  'post_title'    => 'you have been forked',
+						  'post_content'  => $base_content . '<p>Forked from . . . </p>',
+						  'post_status'   => 'publish',						 
+						);
+						 
+						// Insert the post into the database
+						wp_insert_post( $forked_post );                   
                     
-                    if ( $sub_categories ){
-                       $form_response .= '<h2>SUCCESS!</h2>';
-                       $form_response .= '<p>The following category and sub categories have been added your blog "<strong>' . $remote_blog->name . '</strong>".</p>';
-                       $form_response .= list_created_categories( $a{'category'},$sub_categories );
-                       $form_response .= '<p>Only posts you create in these categories on your blog "<strong>' . $remote_blog->name . '</strong>" will appear on this site.</p>';
-                       $form_response .= '<a href="' . $remote_blog->url . '">Return to your site '.$remote_blog->name.'</a>';
+                    if ( $remote_blog ){
+                       $form_response .= '<h2>SUCCESS!</h2>';  
+                              
 
                     } else {
-                        $form_response .= '<h2>SUCCESS!</h2>';
-                        $form_response .= '<p>The category "<strong>' . $a{'category'} . '</strong>" has been added to your blog "<strong>' . $remote_blog->name . '</strong>".</p>
-                    <p>Only posts you create in the "' . $a{'category'} . '" category on your blog "<strong>' . $remote_blog->name . '</strong>" will appear on this site.</p>';
-                        $form_response .= '<a href="' . $remote_blog->url . '">Return to your site '.$remote_blog->name.'</a>';
+                        $form_response .= '<h2>SUCCESS2!</h2>';
+					                   
                     }
 
                     return $form_response;
 
                 } 
-                else if ($_POST['blog-feed'] && !$_POST['email']) {
-                    create_fwp_link_off_network();
-                    
-                    $form_response .= '<h2>SUCCESS!</h2>';
-                    $form_response .= "<p>You submitted the feed <a href='" . $_POST['blog-feed'] . "'>" . $_POST['blog-feed'] . "</a> to this site.<br/>
-                    Only posts that appear in the feed you submitted will appear on this site.</p>";
-
-                    return $form_response;
-                } 
+                
                 else {
-                    $form_response .= "<h2>CRUSHING DEFEAT!</h2>";
-                    $form_response .= "<p>An error occurred. You have not been connected. But you should totally try again.</p>";
-                    $form_response .= "<p>An error occurred. You have not been subscribed. But you should totally try again.</p>";
-                    $form_response = "<p>An error occurred. You have not been connected.</p>";
-                    $form_response .= "<h2>CRUSHING DEFEAT!</h2>";
-                    $form_response .= "<p>An error occurred. You have not been subscribed. But you should totally try again.</p>";
-
+                    $form_response .= "<h2>CRUSHING DEFEAT!</h2>";                   
 
                     return $form_response;
                 }
@@ -100,6 +89,7 @@ function make_brancher_html(){
         return $blog_select;
   
 }
+
 
 function make_post_jolly($content){
 	return $content . make_brancher_html();
@@ -118,7 +108,6 @@ add_filter( 'the_content', 'make_post_jolly' );
 
                 return $choices;
             }
-
 
 
 function get_blogs_of_current_user_by_role() {
