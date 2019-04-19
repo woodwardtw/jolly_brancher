@@ -59,7 +59,7 @@ function make_brancher_html(){
                     switch_to_blog($_POST['blog-select']);
                     $forked_post = array(
 						  'post_title'    => 'Fork of ' . $base_title,
-						  'post_content'  => $base_content . '<div style="width: 100%; display:block; margin: 20px 0;">Forked from <a href="'.$home_url.'">'.$base_title.'</a></p>',
+						  'post_content'  => $base_content . '<div style="width: 100%; display:block; margin: 20px 0; border-left:3px solid #000; padding-left:3px;">Forked from <a href="'.$home_url.'">'.$base_title.'</a></p>',
 						  'post_status'   => 'publish',						 
 						);
 						 
