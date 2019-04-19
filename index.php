@@ -64,11 +64,14 @@ function make_brancher_html(){
 						);
 						 
 						// Insert the post into the database
-						wp_insert_post( $forked_post );                   
-                    
+						$destination_id = wp_insert_post( $forked_post );                   
+						$dest_url = get_post_permalink($destination_id);
+
                     if ( $remote_blog ){
                        $form_response .= '<h2>SUCCESS!</h2>';  
-                              
+					    $form_response .='<script type="text/javascript">';
+					    $form_response .= 'window.location = "' . $dest_url . '"';
+					    $form_response .= '</script>';
 
                     } else {
                         $form_response .= '<h2>SUCCESS2!</h2>';
