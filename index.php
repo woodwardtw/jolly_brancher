@@ -100,7 +100,8 @@ function make_post_jolly($content){
 }
 
 
-add_filter( 'the_content', 'make_post_jolly' );
+//add_filter( 'the_content', 'make_post_jolly' );
+add_shortcode( 'fork', 'make_post_jolly' );
 
 
  function create_blogs_dropdown($blogs){
